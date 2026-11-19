@@ -1,0 +1,119 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNbECHjpTbViXMzjaWsIyWU",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/collinskiplangatrotich/plp-da-a4-student-eda-and-board-report/blob/main/generate_data_py\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "idiF-vC0xk0o",
+        "outputId": "d744ce53-8458-4770-a9c6-a730eb0189b8"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Generated student_performance.csv and duka_sales.csv successfully.\n"
+          ]
+        }
+      ],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "\n",
+        "\n",
+        "def generate_student_data():\n",
+        "    \"\"\"Generates student_performance.csv (1,200 students, seed 55).\"\"\"\n",
+        "    rng = np.random.default_rng(55)\n",
+        "    n = 1200\n",
+        "    students = pd.DataFrame({\n",
+        "        \"student_id\": range(1, n + 1),\n",
+        "        \"county\": rng.choice(\n",
+        "            [\"Nairobi\", \"Kisumu\", \"Nakuru\", \"Mombasa\", \"Nyeri\", \"Turkana\"],\n",
+        "            n,\n",
+        "        ),\n",
+        "        \"school_type\": rng.choice([\"Public\", \"Private\"], n, p=[0.75, 0.25]),\n",
+        "        \"gender\": rng.choice([\"F\", \"M\"], n),\n",
+        "        \"attendance_rate\": rng.beta(8, 2, n).round(2),\n",
+        "        \"study_hours\": rng.gamma(2.5, 2.0, n).round(1),\n",
+        "    })\n",
+        "    base = (\n",
+        "        35\n",
+        "        + 30 * students[\"attendance_rate\"]\n",
+        "        + 2.2 * students[\"study_hours\"]\n",
+        "        + np.where(students[\"school_type\"] == \"Private\", 6, 0)\n",
+        "    )\n",
+        "    students[\"math\"] = (base + rng.normal(0, 8, n)).clip(0, 100).round(0)\n",
+        "    students[\"english\"] = (base + rng.normal(3, 7, n)).clip(0, 100).round(0)\n",
+        "    students[\"science\"] = (base + rng.normal(-2, 9, n)).clip(0, 100).round(0)\n",
+        "    students.to_csv(\"student_performance.csv\", index=False)\n",
+        "\n",
+        "\n",
+        "def generate_duka_data():\n",
+        "    \"\"\"Generates duka_sales.csv (1,000 orders, seed 2026).\"\"\"\n",
+        "    rng = np.random.default_rng(2026)\n",
+        "    n = 1000\n",
+        "    products = {\n",
+        "        \"Phone\": 15000,\n",
+        "        \"Laptop\": 65000,\n",
+        "        \"Headphones\": 2500,\n",
+        "        \"Tablet\": 28000,\n",
+        "        \"Charger\": 1200,\n",
+        "    }\n",
+        "    sales = pd.DataFrame({\n",
+        "        \"order_id\": range(1001, 1001 + n),\n",
+        "        \"order_date\": pd.to_datetime(\"2026-01-01\")\n",
+        "                      + pd.to_timedelta(rng.integers(0, 180, n), unit=\"D\"),\n",
+        "        \"branch\": rng.choice(\n",
+        "            [\"Nairobi\", \"Mombasa\", \"Kisumu\", \"Nakuru\", \"Eldoret\"],\n",
+        "            n,\n",
+        "            p=[0.4, 0.2, 0.15, 0.15, 0.1],\n",
+        "        ),\n",
+        "        \"product\": rng.choice(list(products), n),\n",
+        "        \"quantity\": rng.integers(1, 6, n),\n",
+        "        \"channel\": rng.choice(\n",
+        "            [\"In-store\", \"Online\", \"Phone order\"],\n",
+        "            n,\n",
+        "            p=[0.55, 0.35, 0.10],\n",
+        "        ),\n",
+        "    })\n",
+        "    sales[\"unit_price\"] = sales[\"product\"].map(products)\n",
+        "    sales.to_csv(\"duka_sales.csv\", index=False)\n",
+        "\n",
+        "\n",
+        "if __name__ == \"__main__\":\n",
+        "    generate_student_data()\n",
+        "    generate_duka_data()\n",
+        "    print(\"Generated student_performance.csv and duka_sales.csv successfully.\")"
+      ]
+    }
+  ]
+}
